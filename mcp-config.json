@@ -1,0 +1,76 @@
+{
+  "name": "crypto-trading-simulator",
+  "version": "1.0.0",
+  "description": "仮想通貨取引シミュレーター - MCP設定",
+  "type": "web-application",
+  "metadata": {
+    "created": "2025-09-14",
+    "author": "Kotaro Kashiwai",
+    "license": "MIT",
+    "repository": "https://github.com/kashiwai/crypto-trading-simulator"
+  },
+  "features": {
+    "cryptocurrencies": 50,
+    "api": "Binance Public API",
+    "trading_interval": "0.5 seconds",
+    "auto_trading": true,
+    "realtime_prices": true,
+    "websocket": true
+  },
+  "technology": {
+    "frontend": {
+      "framework": "React 18",
+      "build_tool": "Vite",
+      "ui_library": "Framer Motion",
+      "charts": "Chart.js"
+    },
+    "api": {
+      "provider": "Binance",
+      "endpoint": "https://api.binance.com/api/v3",
+      "websocket": "wss://stream.binance.com:9443"
+    }
+  },
+  "deployment": {
+    "development": {
+      "command": "npm run dev",
+      "port": 5173,
+      "url": "http://localhost:5173"
+    },
+    "production": {
+      "command": "npm run build",
+      "output": "dist"
+    },
+    "standalone": {
+      "file": "standalone.html",
+      "description": "CDN版 - サーバー不要"
+    }
+  },
+  "files": {
+    "main_app": "src/App.jsx",
+    "dashboard": "src/components/Dashboard.jsx",
+    "api_service": "src/services/CryptoAPI.js",
+    "simulator": "src/services/TradingSimulator.js",
+    "standalone": "standalone.html",
+    "documentation": "仕様書.md"
+  },
+  "trading_strategy": {
+    "buy_conditions": {
+      "max_positions": 5,
+      "min_balance": 50000,
+      "buy_probability": 0.5,
+      "investment_percent": 0.02
+    },
+    "sell_conditions": {
+      "take_profit": 0.001,
+      "stop_loss": -0.01,
+      "random_sell_probability": 0.5
+    }
+  },
+  "supported_cryptocurrencies": [
+    "BTC", "ETH", "BNB", "SOL", "XRP", "ADA", "DOGE", "AVAX", "DOT", "MATIC",
+    "LINK", "UNI", "LTC", "FTM", "ATOM", "XLM", "NEAR", "ALGO", "VET", "FIL",
+    "ICP", "APT", "ARB", "OP", "INJ", "TRX", "HBAR", "LDO", "IMX", "GRT",
+    "SAND", "MANA", "AXS", "THETA", "EGLD", "FLOW", "CHZ", "KCS", "QNT", "AAVE",
+    "SNX", "CRV", "MKR", "COMP", "ENJ", "BAT", "ZIL", "DASH", "NEO", "WAVES"
+  ]
+}
