@@ -1,0 +1,142 @@
+.price-chart {
+  background: linear-gradient(135deg, #1e1e3f 0%, #2a2a4e 100%);
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chart-header {
+  margin-bottom: 24px;
+}
+
+.chart-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 16px;
+}
+
+.crypto-selector {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.crypto-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.crypto-btn:hover {
+  background: rgba(0, 255, 136, 0.1);
+  border-color: rgba(0, 255, 136, 0.3);
+}
+
+.crypto-btn.active {
+  background: rgba(0, 255, 136, 0.2);
+  border-color: #00ff88;
+}
+
+.crypto-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.crypto-price {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.price-change {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.price-change.up {
+  color: #00ff88;
+}
+
+.price-change.down {
+  color: #ff4444;
+}
+
+.chart-container {
+  margin-bottom: 24px;
+}
+
+.recent-trades {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.recent-trades h3 {
+  font-size: 14px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.trades-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trade-item {
+  display: grid;
+  grid-template-columns: 40px 60px 1fr auto;
+  gap: 12px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  font-size: 14px;
+  align-items: center;
+}
+
+.trade-item.buy {
+  border-left: 3px solid #00ff88;
+}
+
+.trade-item.sell {
+  border-left: 3px solid #ff4444;
+}
+
+.trade-type {
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.trade-item.buy .trade-type {
+  color: #00ff88;
+}
+
+.trade-item.sell .trade-type {
+  color: #ff4444;
+}
+
+.trade-symbol {
+  color: #e5e7eb;
+  font-weight: 600;
+}
+
+.trade-amount {
+  color: #9ca3af;
+}
+
+.trade-price {
+  color: #ffffff;
+  font-weight: 600;
+  text-align: right;
+}

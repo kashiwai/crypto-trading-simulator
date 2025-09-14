@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仮想通貨取引シミュレーター - テストページ</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-family: sans-serif;
+            padding: 50px;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            margin-bottom: 30px;
+        }
+        .link {
+            display: inline-block;
+            background: #00ff88;
+            color: #1e1e3f;
+            padding: 15px 30px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: transform 0.3s;
+        }
+        .link:hover {
+            transform: scale(1.05);
+        }
+        .status {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(0, 255, 136, 0.2);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 仮想通貨取引シミュレーター</h1>
+        <div class="status">
+            <p>✅ サーバーは正常に起動しています</p>
+            <p>ポート: 5173</p>
+        </div>
+        <p>以下のリンクをクリックしてアプリケーションを開いてください：</p>
+        <a href="http://localhost:5173" class="link">アプリケーションを開く</a>
+
+        <hr style="margin: 40px 0; opacity: 0.3;">
+
+        <h2>使い方：</h2>
+        <ol style="text-align: left; max-width: 400px; margin: 0 auto;">
+            <li>初期投資金額を設定（例：1,000,000円）</li>
+            <li>目標収益率を設定（例：20%）</li>
+            <li>達成期間を設定（例：30日）</li>
+            <li>「開始」ボタンをクリック</li>
+            <li>AI自動売買を有効にして取引開始</li>
+        </ol>
+    </div>
+</body>
+</html>

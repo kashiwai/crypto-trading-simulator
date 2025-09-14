@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仮想通貨取引シミュレーター</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e1e3f 0%, #2a2a4e 100%);
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+        }
+
+        .app {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: #00ff88;
+        }
+
+        .stat-label {
+            color: #999;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .crypto-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .crypto-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .crypto-card:hover {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: #00ff88;
+        }
+
+        .crypto-symbol {
+            font-weight: bold;
+            color: #00ff88;
+            margin-bottom: 5px;
+        }
+
+        .crypto-price {
+            font-size: 12px;
+            color: #fff;
+        }
+
+        .control-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: #00ff88;
+            color: #1e1e3f;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+            transition: opacity 0.3s;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        .btn.active {
+            background: #ff4444;
+            color: white;
+        }
+
+        .trades-list {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .trade-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .trade-buy {
+            border-left: 3px solid #00ff88;
+        }
+
+        .trade-sell {
+            border-left: 3px solid #ff4444;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 20px;
+            color: #00ff88;
+        }
+
+        .error {
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid #ff4444;
+            color: #ff4444;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        function App() {
+            const [balance, setBalance] = useState(1000000);
+            const [positions, setPositions] = useState([]);
+            const [trades, setTrades] = useState([]);
+            const [prices, setPrices] = useState({});
+            const [isAutoTrading, setIsAutoTrading] = useState(false);
+            const [loading, setLoading] = useState(true);
+            const [error, setError] = useState(null);
+
+            // 50種類の仮想通貨リスト
+            const cryptoList = [
+                'BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'ADA', 'DOGE', 'AVAX', 'DOT', 'MATIC',
+                'LINK', 'UNI', 'LTC', 'FTM', 'ATOM', 'XLM', 'NEAR', 'ALGO', 'VET', 'FIL',
+                'ICP', 'APT', 'ARB', 'OP', 'INJ', 'TRX', 'HBAR', 'LDO', 'IMX', 'GRT',
+                'SAND', 'MANA', 'AXS', 'THETA', 'EGLD', 'FLOW', 'CHZ', 'KCS', 'QNT', 'AAVE',
+                'SNX', 'CRV', 'MKR', 'COMP', 'ENJ', 'BAT', 'ZIL', 'DASH', 'NEO', 'WAVES'
+            ];
+
+            // 価格データを取得
+            const fetchPrices = async () => {
+                try {
+                    const response = await axios.get('https://api.binance.com/api/v3/ticker/price');
+                    const priceData = {};
+                    const usdToJpy = 150;
+
+                    response.data.forEach(ticker => {
+                        const symbol = ticker.symbol.replace('USDT', '');
+                        if (cryptoList.includes(symbol)) {
+                            priceData[symbol] = parseFloat(ticker.price) * usdToJpy;
+                        }
+                    });
+
+                    // デフォルト価格を設定
+                    cryptoList.forEach(symbol => {
+                        if (!priceData[symbol]) {
+                            priceData[symbol] = Math.random() * 100000 + 10000;
+                        }
+                    });
+
+                    setPrices(priceData);
+                    setLoading(false);
+                } catch (err) {
+                    console.error('Price fetch error:', err);
+                    // フォールバック価格を設定
+                    const fallbackPrices = {};
+                    cryptoList.forEach(symbol => {
+                        fallbackPrices[symbol] = Math.random() * 100000 + 10000;
+                    });
+                    setPrices(fallbackPrices);
+                    setLoading(false);
+                }
+            };
+
+            // 自動取引の実行
+            const executeTrade = () => {
+                if (!isAutoTrading || Object.keys(prices).length === 0) return;
+
+                // まず売却判定（保有ポジションがある場合）
+                const openPositions = positions.filter(p => p.status === 'open');
+
+                // ランダムに価格を少し変動させる（リアルな取引をシミュレート）
+                Object.keys(prices).forEach(symbol => {
+                    const change = (Math.random() - 0.5) * 0.01; // ±0.5%の変動
+                    setPrices(prev => ({
+                        ...prev,
+                        [symbol]: prev[symbol] * (1 + change)
+                    }));
+                });
+
+                // 売却処理（ポジションがある場合は必ず売却判定）
+                if (openPositions.length > 0) {
+                    // ランダムにポジションを選択
+                    const randomPosition = openPositions[Math.floor(Math.random() * openPositions.length)];
+                    const currentPrice = prices[randomPosition.symbol] * (1 + (Math.random() - 0.5) * 0.02);
+                    const profit = (currentPrice - randomPosition.buyPrice) / randomPosition.buyPrice * 100;
+
+                    // 超積極的な売却条件（0.1%利益で即売却、または50%の確率で売却）
+                    if (profit > 0.1 || profit < -1.0 || Math.random() > 0.5) {
+                        const revenue = randomPosition.amount * currentPrice;
+                        setBalance(prev => prev + revenue);
+                        setPositions(prev => prev.filter(p => p.id !== randomPosition.id)); // ポジションを削除
+                        setTrades(prev => [{
+                            id: Date.now() + Math.random(),
+                            type: 'sell',
+                            symbol: randomPosition.symbol,
+                            amount: randomPosition.amount,
+                            price: currentPrice,
+                            profit: profit > 0 ? `+${profit.toFixed(2)}%` : `${profit.toFixed(2)}%`,
+                            time: new Date().toLocaleTimeString('ja-JP')
+                        }, ...prev.slice(0, 19)]);
+                        return; // 売却したら終了
+                    }
+                }
+
+                // 購入処理（ポジションが5個未満の時のみ）
+                if (openPositions.length < 5 && balance > 50000 && Math.random() > 0.5) { // 50%の確率で購入
+                    const symbols = Object.keys(prices);
+                    const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                    const price = prices[randomSymbol];
+                    const amount = (balance * 0.02) / price; // 残高の2%で購入
+                    const cost = amount * price;
+
+                    if (cost < balance) {
+                        setBalance(prev => prev - cost);
+                        setPositions(prev => [...prev, {
+                            id: Date.now() + Math.random(),
+                            symbol: randomSymbol,
+                            amount,
+                            buyPrice: price,
+                            status: 'open'
+                        }]);
+                        setTrades(prev => [{
+                            id: Date.now() + Math.random(),
+                            type: 'buy',
+                            symbol: randomSymbol,
+                            amount,
+                            price,
+                            time: new Date().toLocaleTimeString('ja-JP')
+                        }, ...prev.slice(0, 19)]);
+                    }
+                }
+            };
+
+            // 総資産を計算
+            const getTotalValue = () => {
+                let total = balance;
+                positions.filter(p => p.status === 'open').forEach(position => {
+                    if (prices[position.symbol]) {
+                        total += position.amount * prices[position.symbol];
+                    }
+                });
+                return total;
+            };
+
+            useEffect(() => {
+                fetchPrices();
+                const interval = setInterval(fetchPrices, 10000); // 10秒ごとに価格更新
+                return () => clearInterval(interval);
+            }, []);
+
+            useEffect(() => {
+                if (isAutoTrading) {
+                    const interval = setInterval(executeTrade, 500); // 0.5秒ごとに取引
+                    return () => clearInterval(interval);
+                }
+            }, [isAutoTrading, prices, balance, positions]);
+
+            if (loading) {
+                return <div className="loading">データを読み込み中...</div>;
+            }
+
+            const totalValue = getTotalValue();
+            const profitLoss = totalValue - 1000000;
+            const profitPercentage = (profitLoss / 1000000 * 100).toFixed(2);
+
+            return (
+                <div className="app">
+                    <div className="header">
+                        <h1 className="title">🚀 仮想通貨取引シミュレーター</h1>
+                        <button
+                            className={`btn ${isAutoTrading ? 'active' : ''}`}
+                            onClick={() => setIsAutoTrading(!isAutoTrading)}
+                        >
+                            {isAutoTrading ? 'AI取引停止' : 'AI取引開始'}
+                        </button>
+                    </div>
+
+                    <div className="stats-grid">
+                        <div className="stat-card">
+                            <div className="stat-label">総資産</div>
+                            <div className="stat-value">¥{totalValue.toLocaleString()}</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-label">現金残高</div>
+                            <div className="stat-value">¥{balance.toLocaleString()}</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-label">損益</div>
+                            <div className="stat-value" style={{color: profitLoss >= 0 ? '#00ff88' : '#ff4444'}}>
+                                {profitLoss >= 0 ? '+' : ''}¥{profitLoss.toLocaleString()}
+                            </div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-label">収益率</div>
+                            <div className="stat-value" style={{color: profitLoss >= 0 ? '#00ff88' : '#ff4444'}}>
+                                {profitLoss >= 0 ? '+' : ''}{profitPercentage}%
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 style={{marginBottom: '10px'}}>仮想通貨価格（50種類）</h3>
+                    <div className="crypto-grid">
+                        {Object.entries(prices).slice(0, 20).map(([symbol, price]) => (
+                            <div key={symbol} className="crypto-card">
+                                <div className="crypto-symbol">{symbol}</div>
+                                <div className="crypto-price">¥{price.toLocaleString()}</div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <h3 style={{marginBottom: '10px'}}>最近の取引</h3>
+                    <div className="trades-list">
+                        {trades.length === 0 ? (
+                            <p style={{textAlign: 'center', color: '#999'}}>取引履歴なし</p>
+                        ) : (
+                            trades.map(trade => (
+                                <div key={trade.id} className={`trade-item trade-${trade.type}`}>
+                                    <div>
+                                        <strong>{trade.type === 'buy' ? '購入' : '売却'}</strong>
+                                        <div>{trade.symbol} × {trade.amount.toFixed(4)}</div>
+                                    </div>
+                                    <div style={{textAlign: 'right'}}>
+                                        <div>¥{trade.price.toLocaleString()}</div>
+                                        <div style={{fontSize: '12px', color: '#999'}}>{trade.time}</div>
+                                        {trade.profit && <div style={{color: trade.profit.startsWith('+') ? '#00ff88' : '#ff4444'}}>{trade.profit}</div>}
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
